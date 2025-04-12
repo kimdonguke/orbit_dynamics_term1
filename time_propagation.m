@@ -1,6 +1,6 @@
 % 우주궤도역학 term project#1 (i=0, RAAN=0, w=0)
 
-%변수 선언(지구 중력 상수, 반장축, 이심률, 
+%변수 선언(지구 중력 상수, 반장축, 이심률)
 mu = 398600; %지구중력상수 뮤(km^3/s^2)
 a = 20000;    % 반장축 a(km)
 e = 0.3;      % 이심률
@@ -20,12 +20,11 @@ t_eval = linspace(tspan(1), tspan(2), 1000); % 시간 분할(0~궤도 2바퀴, 1
 % two_body 함수 정의
 two_body = @(t, y) [y(4:6); -mu * y(1:3) / norm(y(1:3))^3];
 
-% 
-[t, state] = ode45(two_body, t_eval, state0);
+% 오차 보정
+opts=odeset('RelTol',1e-9,'AbsTol',1e-9);
+[t, state] = ode45(two_body, t_eval, state0,opts);
 
-% =====================
-% Step 5: Plotting position over time
-% =====================
+
 figure;
 plot3(state(:,1), state(:,2), state(:,3));
 xlabel('X [km]'); ylabel('Y [km]'); zlabel('Z [km]');
