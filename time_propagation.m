@@ -16,7 +16,7 @@ state0 = [r_vec; v_vec];       % 초기 상태 벡터
 T = 2 * pi * sqrt(a^3 / mu);   % 주기 계산
 n=4;                           % n번
 time_sampling=n*700;           % time_sampling
-tspan = [0, n*T];        % 주기를 n 번 도는 궤도 propagation 범위
+tspan = [0, n*T];              % n주기 궤도
 t_eval = linspace(tspan(1), tspan(2), time_sampling); % 시간 분할(0~주기, 각 700개 구간으로 나눠서)
 % 주기가 늘어날 수록 time sampling도 커져야함
 
@@ -46,7 +46,7 @@ nexttile;
 plot(time_min, x, 'b');
 title('X position by time');
 xlabel('Time (min)');
-ylabel('X [km]');
+ylabel('X (km)');
 grid on;
 
 % 2번째 tile(propagation of Y)
