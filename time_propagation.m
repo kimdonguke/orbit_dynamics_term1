@@ -1,9 +1,9 @@
 % 우주궤도역학 term project#1 (i=0, RAAN=0, w=0)
 
 %변수 선언(지구 중력 상수, 반장축, 이심률)
-mu = 398600; %지구중력상수 뮤(km^3/s^2)
+mu = 398600;  %지구중력상수 뮤(km^3/s^2)
 a = 20000;    % 반장축 a(km)
-e = 0.3;      % 이심률
+e = 0.8;      % 이심률
 nu = 0;       % 진근점각(True Anomaly)
 
 
@@ -13,20 +13,61 @@ r_vec = [r * cos(nu); r * sin(nu); 0];              % r벡터 변환
 v_vec = sqrt(mu/p) * [-sin(nu); e + cos(nu); 0];    % v벡터 변환
 
 state0 = [r_vec; v_vec];       % 초기 상태 벡터
-T = 2 * pi * sqrt(a^3 / mu);  % 주기 계산
-tspan = [0, 2*T];        % 주기를 두 번 도는 궤도 propagation 범위
-t_eval = linspace(tspan(1), tspan(2), 1000); % 시간 분할(0~궤도 2바퀴, 1000개 구간으로 나눠서)
+T = 2 * pi * sqrt(a^3 / mu);   % 주기 계산
+n=4;                           % n번
+time_sampling=n*700;           % time_sampling
+tspan = [0, n*T];        % 주기를 n 번 도는 궤도 propagation 범위
+t_eval = linspace(tspan(1), tspan(2), time_sampling); % 시간 분할(0~주기, 각 700개 구간으로 나눠서)
+% 주기가 늘어날 수록 time sampling도 커져야함
 
 % two_body 함수 정의
 two_body = @(t, y) [y(4:6); -mu * y(1:3) / norm(y(1:3))^3];
 
 % 오차 보정
 opts=odeset('RelTol',1e-9,'AbsTol',1e-9);
-[t, state] = ode45(two_body, t_eval, state0,opts);
+[t, state] = ode45(two_body, t_eval, state0, opts);
 
+x = state(:,1);
+y = state(:,2);
+vx = state(:,4);
+vy = state(:,5);
+vz = state(:,6);
+v_mag = sqrt(vx.^2 + vy.^2 + vz.^2);
+time_min = t / 60;
 
+% === Plotting ===
 figure;
-plot3(state(:,1), state(:,2), state(:,3));
-xlabel('X [km]'); ylabel('Y [km]'); zlabel('Z [km]');
-title('Orbit Propagation in ECI Frame');
-grid on; axis equal;
+tiledlayout(2,2);
+
+% 1st quadrant: X position
+nexttile;
+plot(time_min, x, 'b');
+title('X position by time');
+xlabel('Time (min)');
+ylabel('X [km]');
+grid on;
+
+% 2nd quadrant: Y position
+nexttile;
+plot(time_min, y, 'g');
+title('Y position by time');
+xlabel('Time (min)');
+ylabel('Y (km)');
+grid on;
+
+% 3rd quadrant: Speed
+nexttile;
+plot(time_min, v_mag, 'm');
+title('Speed by time');
+xlabel('Time (min)');
+ylabel('Speed (km/s)');
+grid on;
+
+% 4th quadrant: Orbit Path
+nexttile;
+plot(x, y, 'k');
+title('Orbit shape');
+xlabel('X (km)');
+ylabel('Y (km)');
+axis equal;
+grid on
