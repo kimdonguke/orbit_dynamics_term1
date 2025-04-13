@@ -25,8 +25,10 @@ two_body = @(t, y) [y(4:6); -mu * y(1:3) / norm(y(1:3))^3];
 
 % 오차 보정
 opts=odeset('RelTol',1e-9,'AbsTol',1e-9);
+%적분
 [t, state] = ode45(two_body, t_eval, state0, opts);
 
+%그래프용 변수 재정의
 x = state(:,1);
 y = state(:,2);
 vx = state(:,4);
@@ -35,11 +37,11 @@ vz = state(:,6);
 v_mag = sqrt(vx.^2 + vy.^2 + vz.^2);
 time_min = t / 60;
 
-% === Plotting ===
+% 2*2 tiledLayout setting
 figure;
 tiledlayout(2,2);
 
-% 1st quadrant: X position
+% 1번째 tile(propagation of X)
 nexttile;
 plot(time_min, x, 'b');
 title('X position by time');
@@ -47,7 +49,7 @@ xlabel('Time (min)');
 ylabel('X [km]');
 grid on;
 
-% 2nd quadrant: Y position
+% 2번째 tile(propagation of Y)
 nexttile;
 plot(time_min, y, 'g');
 title('Y position by time');
@@ -55,15 +57,15 @@ xlabel('Time (min)');
 ylabel('Y (km)');
 grid on;
 
-% 3rd quadrant: Speed
+% 3번째 tile(propagation of velocity)
 nexttile;
 plot(time_min, v_mag, 'm');
-title('Speed by time');
+title('Velocity by time');
 xlabel('Time (min)');
-ylabel('Speed (km/s)');
+ylabel('Velocity (km/s)');
 grid on;
 
-% 4th quadrant: Orbit Path
+% 4번째 tile(orbit)
 nexttile;
 plot(x, y, 'k');
 title('Orbit shape');
