@@ -16,13 +16,13 @@ m_sun   = 1.989e30;
 r_earth = [0; 0; 0];
 r_moon  = [384400; 0; 0];
 %r_sat   = [310000; 0; 0]; %swingby distance
-r_sat   = [7000; 0; 0];
+r_sat   = [50000; 0; 0];
 r_sun   = [1.496e8; 0; 0];
 
 % Initial velocities
 v_earth = [0; 29.78; 0];
 v_moon  = v_earth + [0; 1.022; 0];
-% v_sat   = v_earth + [0; 10; 0];
+%v_sat   = v_earth + [0; 10; 0];
 cv_sat   =sqrt(mu/norm(r_sat)); %circula orbit으로 계산하고 싶을 때 사용 할 수 있는 식
 v_sat   = v_earth + [0; cv_sat; 0];
 v_sun   = [0; 0; 0]; % helio centric inertial frame
@@ -34,15 +34,15 @@ masses = [m_earth, m_moon, m_sat, m_sun];
 % Time span, sampling
 n=1200; % n 일
 T = n*86160; 
-time_sampling = 700;
+time_sampling = n*5;
 t_eval=linspace(0, T, time_sampling);
 
 % 적분
 opts = odeset('RelTol',1e-9,'AbsTol',1e-9);
 [t, y] = ode45(@(t,y) computeNBody(t,y,masses,G),t_eval, state0, opts);
 
-%heliocentric_plot(y);
-eci_plot(y);
+%heliocentric_plot(y); % 태양 중심 좌표계
+eci_plot(y); % 지구중심좌표계
 
 % 함수 선언
 function dydt = computeNBody(t, y, masses, G)
@@ -77,8 +77,6 @@ function heliocentric_plot(y)
     r_sat   = squeeze(r(:,3,:));   % 위성
     r_sun   = squeeze(r(:,4,:));   % 태양
     
-    
-
     %Helio-centric 그래프
     figure;
     nexttile;
