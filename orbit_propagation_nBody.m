@@ -15,15 +15,16 @@ m_sun   = 1.989e30;
 % Initial positions
 r_earth = [0; 0; 0];
 r_moon  = [384400; 0; 0];
+%r_sat   = [310000; 0; 0]; %swingby distance
 r_sat   = [7000; 0; 0];
 r_sun   = [1.496e8; 0; 0];
 
 % Initial velocities
 v_earth = [0; 29.78; 0];
 v_moon  = v_earth + [0; 1.022; 0];
-v_sat   = v_earth + [0; 10; 0];
-% cv_sat   =sqrt(mu/norm(r_sat)); %circula orbit으로 계산하고 싶을 때 사용 할 수 있는 식
-% v_sat   = v_earth + [0; cv_sat; 0];
+% v_sat   = v_earth + [0; 10; 0];
+cv_sat   =sqrt(mu/norm(r_sat)); %circula orbit으로 계산하고 싶을 때 사용 할 수 있는 식
+v_sat   = v_earth + [0; cv_sat; 0];
 v_sun   = [0; 0; 0]; % helio centric inertial frame
 
 % 4-body initial state vector
@@ -35,7 +36,6 @@ n=1200; % n 일
 T = n*86160; 
 time_sampling = 700;
 t_eval=linspace(0, T, time_sampling);
-
 
 % 적분
 opts = odeset('RelTol',1e-9,'AbsTol',1e-9);
