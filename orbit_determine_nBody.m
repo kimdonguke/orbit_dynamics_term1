@@ -81,12 +81,13 @@ function dydt = computeNBody(t, y, masses, G)
 end
 
 % centric frame 결정 함수
-function [r_rel, v_rel, primary_idx] = select_frame(r_sat, v_sat, r_state, v_state, masses, G)
-    accels = G .* masses ./ vecnorm(r_state - r_sat, 2, 1).^2; %상대거리 슬라이싱 후 a=GM/r^2 계산
-    [~, primary_idx] = max(accels); % 가속도가 가장 큰 원소의 인덱스 추출
-    r_rel = r_sat - r_state(:, primary_idx);
-    v_rel = v_sat - v_state(:, primary_idx);
-end
+% function [r_rel, v_rel, primary_idx] = select_frame(r_sat, v_sat, r_state, v_state, masses, G)
+%     accels = G .* masses ./ vecnorm(r_state - r_sat, 2, 1).^2; %상대거리 슬라이싱 후 a=GM/r^2 계산
+%     [~, primary_idx] = max(accels); % 가속도가 가장 큰 원소의 인덱스 추출
+%     r_rel = r_sat - r_state(:, primary_idx);
+%     v_rel = v_sat - v_state(:, primary_idx);
+% end
+% 폐기;;
 
 % centric frame이 바뀌는지 안 바뀌는지 검사하는 함수
 function frame_switch(y, masses, G, labels)
