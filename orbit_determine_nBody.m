@@ -1,7 +1,9 @@
 % 우주궤도역학 term project#1
 
-% 변수 선언
+% 상수 선언
 G = 6.67430e-20;
+labels = {'Earth', 'Moon', 'Sun'};
+mu=0;
 
 % masses
 m_earth = 5.972e24;
@@ -21,8 +23,28 @@ v_moon  = v_earth + [0; 1.022; 0];
 v_sat   = v_earth + [0; 10; 0];
 v_sun   = [0; 0; 0]; % helio centric inertial frame
 
+% 위치,속도,질량 배열
+r_list = [r_earth, r_moon, r_sun];
+v_list = [v_earth, v_moon, v_sun];
+state0 = [r_list, r_sat, v_list, v_sat];
+masses = [m_earth, m_moon, m_sun]; %지구 달 태양
+masses_prop = [m_earth, m_moon, m_sat, m_sun]; %지구 달 위성 태양
 
-masses = [m_earth, m_moon, m_sat, m_sun]; %지구 달 위성 태양
+%% orbit determine 시작 %%
+% 1. Time Sampling 
+n=100; % n 일
+T = n*86160; 
+time_sampling = n*30; % 궤도 변화를 보는 것이기 때문에 곱해지는 인자를 크게 할 필요가 없음
+t_eval=linspace(0, T, time_sampling);
+
+% 2. time propagation
+opts = odeset('RelTol',1e-9,'AbsTol',1e-9);
+[t, y] = ode45(@(t,y) computeNBody(t,y,masses_prop,G),t_eval, state0, opts);
+
+% 3. centric frame이 바뀌는지 관찰, 바뀐다면 출력
+frame_switch(y,masses,G,labels);
+
+
 
 
 %궤도 결정 함수
@@ -43,10 +65,73 @@ function orbit_type = orbit_determine(r, v, mu)
     end
 end
 
+% 함수 선언
+function dydt = computeNBody(t, y, masses, G)
+    N = length(masses); %천체 갯수
+    r = reshape(y(1:3*N), 3, N); 
+    v = reshape(y(3*N+1:end), 3, N);
+    a = zeros(3, N);
+    for i = 1:N
+        for j = 1:N
+            if i ~= j
+                % F=ma, F=GMm*r/|r|^3
+                diff = r(:,j) - r(:,i); %거리차
+                dist3 = norm(diff)^3 + 1e-9; % 0방지(syntax error)
+                a(:,i) = a(:,i) + G * masses(j) * diff / dist3; %
+            end
+        end
+    end
+    dydt = [v(:); a(:)]; %dydt 반환[Vn, An]
+end
+
 % centric frame 결정 함수
 function [r_rel, v_rel, primary_idx] = select_frame(r_sat, v_sat, r_state, v_state, masses, G)
     accels = G .* masses ./ vecnorm(r_state - r_sat, 2, 1).^2; %상대거리 슬라이싱 후 a=GM/r^2 계산
     [~, primary_idx] = max(accels); % 가속도가 가장 큰 원소의 인덱스 추출
     r_rel = r_sat - r_state(:, primary_idx);
     v_rel = v_sat - v_state(:, primary_idx);
+end
+
+% centric frame이 바뀌는지 안 바뀌는지 검사하는 함수
+function frame_switch(y, masses, G, labels)
+    % y: ode 결과 상태 행렬
+    % masses: 각 천체의 질량 배열
+    % G: 중력상수
+    % labels: 각 천체 이름 cell 배열
+
+    N = length(masses);      % 천체 수
+    steps = size(y, 1);      % 시간 스텝 수
+
+    % 위성 인덱스 (4번째로 고정됨)
+    idx_sat = 4;
+
+    % 이전 중심체 인덱스 초기화
+    previous_idx = -1;
+
+    for k = 1:steps
+        % 위치/속도 재구성
+        r_all = reshape(y(k, 1:3*N), 3, N);
+        v_all = reshape(y(k, 3*N+1:end), 3, N);
+
+        r_sat = r_all(:, idx_sat);
+        v_sat = v_all(:, idx_sat);
+
+        % 모든 천체와의 중력 가속도 크기 계산
+        accels = G .* masses ./ vecnorm(r_all - r_sat, 2, 1).^2;
+        [~, primary_idx] = max(accels);
+
+        % 중심체가 바뀌는 순간에만 출력
+        if primary_idx ~= previous_idx
+            % 상대 위치/속도 계산
+            r_rel = r_sat - r_all(:, primary_idx);
+            v_rel = v_sat - v_all(:, primary_idx);
+            mu = G * masses(primary_idx);
+
+            % 궤도 형태 판별
+            orbit = orbit_determine(r_rel, v_rel, mu);
+            fprintf('Step %d | Frame: %s | Orbit: %s\n', k, labels{primary_idx}, orbit);
+
+            previous_idx = primary_idx;
+        end
+    end
 end
