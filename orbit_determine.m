@@ -1,8 +1,9 @@
-% 우주궤도역학 term project#1 (i=0, RAAN=0, w=0)
+% 우주궤도역학 term project#1
+
+% 변수 선언(r, v vector, 지구 중력 상수 μ)
 r = [7000; 300; 70];
 v = [1; 7.5; 2];
-mu = 398600;
-
+mu = 398600; 
 r_norm = norm(r);
 v_norm = norm(v);
 
@@ -14,8 +15,6 @@ h_norm = norm(h);
 e_vec = (1/mu) * (cross(v, h) - mu * (r / r_norm));
 e = norm(e_vec);
 
-% Specific mechanical energy
-epsilon = v_norm^2 / 2 - mu / r_norm;
 
 % Inclination
 i = acos(h(3) / h_norm);
@@ -69,4 +68,3 @@ fprintf('Inclination (i): %.6f deg\n', rad2deg(i));
 fprintf('RAAN: %.6f deg\n', rad2deg(RAAN));
 fprintf('Argument of Perigee (w): %.6f deg\n', rad2deg(w));
 fprintf('True Anomaly (nu): %.6f deg\n', rad2deg(nu));
-fprintf('Orbit type: %s\n', type);
