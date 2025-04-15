@@ -32,9 +32,9 @@ state0 = [r_earth; r_moon; r_sat; r_sun; v_earth; v_moon; v_sat; v_sun];
 masses = [m_earth, m_moon, m_sat, m_sun];
 
 % Time span, sampling
-n=1200; % n 일
+n=10000; % n 일
 T = n*86160; 
-time_sampling = n*5;
+time_sampling = n*200; %하루를 200번으로 쪼개서 샘플링, 일수가 작다면 잘게 쪼개도 좋음
 t_eval=linspace(0, T, time_sampling);
 
 % 적분
